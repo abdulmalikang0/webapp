@@ -43,7 +43,8 @@ class WelcomeScreen extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Text(
-          'Welcome', style: Theme.of(context).textTheme.displayMedium,
+          'Welcome',
+          style: Theme.of(context).textTheme.displayMedium,
         ),
       ),
     );
@@ -64,7 +65,7 @@ class _SignUpFormState extends State<SignUpForm> {
 
   double _formProgress = 0;
 
-  void _showWelcomeScreen(){
+  void _showWelcomeScreen() {
     Navigator.of(context).pushNamed('/welcome');
   }
 
@@ -76,8 +77,8 @@ class _SignUpFormState extends State<SignUpForm> {
       _usernameTextController
     ];
 
-    for (final controller in controllers ) {
-      if (controller.value.text.isNotEmpty){
+    for (final controller in controllers) {
+      if (controller.value.text.isNotEmpty) {
         progress += 1 / controllers.length;
       }
     }
@@ -87,14 +88,17 @@ class _SignUpFormState extends State<SignUpForm> {
     });
   }
 
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Form(
+      key: _formKey,
       onChanged: _updateFormProgress,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          AnimaedProgressIndicator(
+          AnimatedProgressIndicator(
             value: _formProgress,
           ),
           Text(
@@ -104,6 +108,12 @@ class _SignUpFormState extends State<SignUpForm> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextFormField(
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter first name';
+                }
+                return null;
+              },
               controller: _firstNameTextController,
               decoration: const InputDecoration(hintText: 'First Name'),
             ),
@@ -111,31 +121,46 @@ class _SignUpFormState extends State<SignUpForm> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextFormField(
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter last name';
+                }
+                return null;
+              },
               controller: _lastNameTextController,
               decoration: const InputDecoration(hintText: 'Last Name'),
             ),
           ),
-          Padding(padding: const EdgeInsets.all(8.0),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
             child: TextFormField(
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter username';
+                }
+                return null;
+              },
               controller: _usernameTextController,
               decoration: const InputDecoration(hintText: 'Username'),
             ),
           ),
           TextButton(
-            style: ButtonStyle(
-              foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                return states.contains(MaterialState.disabled)
-                    ? null
-                    :Colors.white;
-              }),
-              backgroundColor: MaterialStateProperty.resolveWith((
-                  Set<MaterialState> states) {
-                return states.contains(MaterialState.disabled)
-                  ? null
-                  : Colors.blue;
-            }),
-            ),
-              onPressed: _formProgress == 1 ? _showWelcomeScreen: null,
+              style: ButtonStyle(
+                foregroundColor: MaterialStateProperty.resolveWith(
+                    (Set<MaterialState> states) {
+                  return states.contains(MaterialState.disabled)
+                      ? null
+                      : Colors.white;
+                }),
+                backgroundColor: MaterialStateProperty.resolveWith(
+                    (Set<MaterialState> states) {
+                  return states.contains(MaterialState.disabled)
+                      ? null
+                      : Colors.blue;
+                }),
+              ),
+              onPressed: _formProgress == 1 ? _showWelcomeScreen : null,
+
               child: const Text('Sign Up'))
         ],
       ),
@@ -143,35 +168,37 @@ class _SignUpFormState extends State<SignUpForm> {
   }
 }
 
-class AnimaedProgressIndicator extends StatefulWidget {
+class AnimatedProgressIndicator extends StatefulWidget {
   final double value;
 
-  const AnimaedProgressIndicator({
+  const AnimatedProgressIndicator({super.key,
     required this.value,
-});
+  });
 
   @override
-  State<AnimaedProgressIndicator> createState() {
+  State<AnimatedProgressIndicator> createState() {
     return _AnimatedProgressIndicatorState();
   }
 }
 
-class _AnimatedProgressIndicatorState extends State<AnimaedProgressIndicator> with SingleTickerProviderStateMixin {
+class _AnimatedProgressIndicatorState extends State<AnimatedProgressIndicator>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<Color?>  _colorAnimation;
+  late Animation<Color?> _colorAnimation;
   late Animation<double> _curveAnimation;
 
   @override
-  void initState()
-  {
+  void initState() {
     super.initState();
     _controller = AnimationController(
-    duration: Duration(milliseconds: 1200), vsync: this
-    );
+        duration: Duration(milliseconds: 1200), vsync: this);
 
     final colorTween = TweenSequence([
-      TweenSequenceItem(tween: ColorTween(begin: Colors.red, end: Colors.yellow), weight: 1),
-      TweenSequenceItem(tween: ColorTween(begin: Colors.yellow, end: Colors.green), weight: 1),
+      TweenSequenceItem(
+          tween: ColorTween(begin: Colors.red, end: Colors.yellow), weight: 1),
+      TweenSequenceItem(
+          tween: ColorTween(begin: Colors.yellow, end: Colors.green),
+          weight: 1),
     ]);
     _colorAnimation = _controller.drive(colorTween);
     _curveAnimation = _controller.drive(CurveTween(curve: Curves.easeIn));
@@ -179,11 +206,13 @@ class _AnimatedProgressIndicatorState extends State<AnimaedProgressIndicator> wi
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(animation: _controller, builder: (context, child) => LinearProgressIndicator(
-      value: _curveAnimation.value,
-      valueColor: _colorAnimation,
-      backgroundColor: _colorAnimation.value?.withOpacity(0.4),
-    ),);
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) => LinearProgressIndicator(
+        value: _curveAnimation.value,
+        valueColor: _colorAnimation,
+        backgroundColor: _colorAnimation.value?.withOpacity(0.4),
+      ),
+    );
   }
-
 }
